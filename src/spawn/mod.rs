@@ -1,4 +1,12 @@
-use bevy::{prelude::*, render::camera::ScalingMode};
+use bevy::{
+    prelude::*,
+    render::camera::ScalingMode,
+    core_pipeline::{
+        bloom::Bloom,
+        core_3d::ScreenSpaceTransmissionQuality,
+        tonemapping::Tonemapping,
+    },
+};
 
 use crate::camera::{
     CameraAngle, CameraPositionController, CameraRotationController, CameraZoomController,
@@ -30,10 +38,10 @@ fn spawn_player(
         Player::new_with_config(&config.player),
         Mesh3d(meshes.add(Mesh::from(Cuboid::new(0.5, 0.5, 0.5)))),
         MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: Color::srgb(0.8, 0.8, 0.9), // 少し青みがかった白
-            metallic: 0.1, // 少しだけメタリック
-            perceptual_roughness: 0.3, // 適度な粗さ
-            reflectance: 0.5, // 適度な反射率
+            base_color: Color::srgb(0.8, 0.8, 0.9),
+            metallic: 0.1,
+            perceptual_roughness: 0.3,
+            reflectance: 0.5,
             ..default()
         })),
         Transform::from_xyz(
@@ -49,11 +57,18 @@ fn spawn_camera(commands: &mut Commands, config: &Res<Config>) {
     let zoom_controller = CameraZoomController::new(&config.camera);
     let camera_angle = CameraAngle::default();
 
-    // カメラの初期位置を設定に基づいて計算
     let initial_transform = camera_angle.get_transform_from_angle(Vec3::ZERO, &config.camera);
 
     commands.spawn((
-        Camera3d::default(),
+        Camera3d {
+            screen_space_specular_transmission_quality: ScreenSpaceTransmissionQuality::High,
+            screen_space_specular_transmission_steps: 1,
+            ..default()
+        },
+        Camera {
+            hdr: true,
+            ..Default::default()
+        },
         initial_transform,
         Projection::Orthographic(OrthographicProjection {
             scaling_mode: ScalingMode::FixedVertical {
@@ -63,6 +78,11 @@ fn spawn_camera(commands: &mut Commands, config: &Res<Config>) {
             far: 1000.0,
             ..OrthographicProjection::default_3d()
         }),
+        Tonemapping::SomewhatBoringDisplayTransform,
+        Bloom {
+            intensity: 0.3,
+            ..default()
+        },
         camera_angle,
         rotation_controller,
         zoom_controller,
@@ -81,7 +101,7 @@ fn spawn_lighting(commands: &mut Commands, asset_server: &Res<AssetServer>) {
     commands.spawn(EnvironmentMapLight {
         diffuse_map: asset_server.load("papermill_diffuse.ktx2"),
         specular_map: asset_server.load("papermill_specular.ktx2"),
-        intensity: 2000.0,
+        intensity: 300.0,
         rotation: Quat::IDENTITY,
         affects_lightmapped_mesh_diffuse: true,
     });
@@ -93,6 +113,6 @@ fn spawn_lighting(commands: &mut Commands, asset_server: &Res<AssetServer>) {
             shadows_enabled: true,
             ..Default::default()
         },
-        Transform::IDENTITY.looking_to(Vec3::new(1.0, -1.8, 0.85), Vec3::Y),
+        Transform::IDENTITY.looking_to(Vec3::new(1.0, -2.5, 0.85), Vec3::Y),
     ));
 }
