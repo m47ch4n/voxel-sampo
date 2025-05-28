@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::config::GameSettings;
+use crate::config::Config;
 use crate::camera::CameraAngle;
 use super::components::Player;
 
@@ -7,29 +7,29 @@ pub fn player_input_system(
     keyboard_input: Res<ButtonInput<KeyCode>>, 
     mut player_query: Query<&mut Player>,
     camera_query: Query<&CameraAngle>,
-    settings: Res<GameSettings>,
+    config: Res<Config>,
 ) {
-    if let Ok(mut player) = player_query.get_single_mut() {
+    if let Ok(mut player) = player_query.single_mut() {
         if player.is_moving {
             return;
         }
 
         let mut direction = Vec3::ZERO;
         
-        if let Ok(camera_angle) = camera_query.get_single() {
+        if let Ok(camera_angle) = camera_query.single() {
             let forward = camera_angle.get_camera_forward_direction();
             let right = camera_angle.get_camera_right_direction();
 
-            if keyboard_input.pressed(KeyCode::KeyW) {
+            if keyboard_input.pressed(config.key_bindings.player_move_up) {
                 direction += forward;
             }
-            if keyboard_input.pressed(KeyCode::KeyS) {
+            if keyboard_input.pressed(config.key_bindings.player_move_down) {
                 direction -= forward;
             }
-            if keyboard_input.pressed(KeyCode::KeyA) {
+            if keyboard_input.pressed(config.key_bindings.player_move_left) {
                 direction -= right;
             }
-            if keyboard_input.pressed(KeyCode::KeyD) {
+            if keyboard_input.pressed(config.key_bindings.player_move_right) {
                 direction += right;
             }
         }
@@ -41,7 +41,7 @@ pub fn player_input_system(
                 direction = Vec3::new(0.0, 0.0, direction.z.signum());
             }
 
-            player.target_position += direction * settings.player_move_speed;
+            player.target_position += direction * config.player.move_speed;
             player.is_moving = true;
             player.move_timer.reset();
         }
@@ -49,7 +49,7 @@ pub fn player_input_system(
 }
 
 pub fn player_movement_system(time: Res<Time>, mut player_query: Query<(&mut Player, &mut Transform)>) {
-    if let Ok((mut player, mut transform)) = player_query.get_single_mut() {
+    if let Ok((mut player, mut transform)) = player_query.single_mut() {
         if player.is_moving {
             player.move_timer.tick(time.delta());
 

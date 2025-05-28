@@ -10,7 +10,7 @@ mod player;
 mod camera;
 mod spawn;
 
-use config::GameSettings;
+use config::Config;
 use spawn::spawn_entities;
 
 fn main() {
@@ -29,11 +29,11 @@ fn main() {
     app.add_plugins((
             window_plugins,
             PanOrbitCameraPlugin,
-            VoxScenePlugin,
+            VoxScenePlugin::default(),
             player::plugin,
             camera::plugin,
         ))
-        .init_resource::<GameSettings>()
+        .init_resource::<Config>()
         .add_systems(Startup, spawn_entities);
 
     app.run();

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::config::PLAYER_MOVE_DURATION;
+use crate::config::PlayerConfig;
 
 #[derive(Component, Debug, Clone)]
 pub struct Player {
@@ -9,20 +9,21 @@ pub struct Player {
 }
 
 impl Player {
-    // pub fn new(settings: &GameSettings) -> Self {
-    //     Self {
-    //         move_timer: Timer::from_seconds(settings.player_move_duration, TimerMode::Once),
-    //         target_position: Vec3::ZERO,
-    //         is_moving: false,
-    //     }
-    // }
+    pub fn new_with_config(player_config: &PlayerConfig) -> Self {
+        Self {
+            move_timer: Timer::from_seconds(player_config.move_duration, TimerMode::Once),
+            target_position: Vec3::new(0.0, 0.5, 0.0),
+            is_moving: false,
+        }
+    }
 }
 
 impl Default for Player {
     fn default() -> Self {
+        let default_config = PlayerConfig::default();
         Self {
-            move_timer: Timer::from_seconds(PLAYER_MOVE_DURATION, TimerMode::Once),
-            target_position: Vec3::ZERO,
+            move_timer: Timer::from_seconds(default_config.move_duration, TimerMode::Once),
+            target_position: Vec3::new(0.0, 0.5, 0.0),
             is_moving: false,
         }
     }
