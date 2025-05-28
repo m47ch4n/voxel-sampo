@@ -6,8 +6,8 @@ pub const PLAYER_MOVE_DURATION: f32 = 0.2;
 pub const CAMERA_DISTANCE: f32 = 40.0;
 pub const CAMERA_HEIGHT: f32 = 24.0;
 pub const CAMERA_ANGLES: [f32; 4] = [60.0, 150.0, 240.0, 330.0];
-pub const BASE_ZOOM: f32 = 7.0;
-pub const ZOOM_OUT_VALUE: f32 = 15.0;
+pub const BASE_ZOOM: f32 = 10.0;
+pub const ZOOM_OUT_VALUE: f32 = 20.0;
 
 // キーバインド設定
 #[derive(Debug, Clone)]

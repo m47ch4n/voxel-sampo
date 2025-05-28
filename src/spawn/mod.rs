@@ -15,7 +15,7 @@ pub fn spawn_entities(
 ) {
     spawn_player(&mut commands, &mut meshes, &mut materials, &config);
     spawn_camera(&mut commands, &config);
-    spawn_lighting(&mut commands);
+    spawn_lighting(&mut commands, &asset_server);
     spawn_room(&mut commands, &asset_server);
 }
 
@@ -30,7 +30,10 @@ fn spawn_player(
         Player::new_with_config(&config.player),
         Mesh3d(meshes.add(Mesh::from(Cuboid::new(0.5, 0.5, 0.5)))),
         MeshMaterial3d(materials.add(StandardMaterial {
-            base_color: Color::WHITE,
+            base_color: Color::srgb(0.8, 0.8, 0.9), // 少し青みがかった白
+            metallic: 0.1, // 少しだけメタリック
+            perceptual_roughness: 0.3, // 適度な粗さ
+            reflectance: 0.5, // 適度な反射率
             ..default()
         })),
         Transform::from_xyz(
@@ -74,13 +77,22 @@ fn spawn_room(commands: &mut Commands, asset_server: &Res<AssetServer>) {
     ));
 }
 
-fn spawn_lighting(commands: &mut Commands) {
+fn spawn_lighting(commands: &mut Commands, asset_server: &Res<AssetServer>) {
+    commands.spawn(EnvironmentMapLight {
+        diffuse_map: asset_server.load("papermill_diffuse.ktx2"),
+        specular_map: asset_server.load("papermill_specular.ktx2"),
+        intensity: 2000.0,
+        rotation: Quat::IDENTITY,
+        affects_lightmapped_mesh_diffuse: true,
+    });
+
     commands.spawn((
         DirectionalLight {
+            color: Color::srgb(0.98, 0.99, 1.0),
             illuminance: 5000.0,
             shadows_enabled: true,
             ..Default::default()
         },
-        Transform::IDENTITY.looking_to(Vec3::new(1.0, -2.5, 0.85), Vec3::Y),
+        Transform::IDENTITY.looking_to(Vec3::new(1.0, -1.8, 0.85), Vec3::Y),
     ));
 }

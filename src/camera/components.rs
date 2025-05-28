@@ -15,7 +15,7 @@ pub struct CameraAngle {
 impl Default for CameraAngle {
     fn default() -> Self {
         Self {
-            current_angle: CAMERA_ANGLES[0],
+            current_angle: CAMERA_ANGLES[3],
         }
     }
 }
