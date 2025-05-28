@@ -1,5 +1,4 @@
 use bevy::{prelude::*, window::WindowResolution};
-use bevy_panorbit_camera::PanOrbitCameraPlugin;
 use bevy_vox_scene::VoxScenePlugin;
 
 mod camera;
@@ -25,7 +24,6 @@ fn main() {
 
     app.add_plugins((
         window_plugins,
-        PanOrbitCameraPlugin,
         VoxScenePlugin::default(),
         player::plugin,
         camera::plugin,
