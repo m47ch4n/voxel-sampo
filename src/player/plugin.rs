@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use super::systems::{player_input_system, player_movement_system};
+use bevy::prelude::*;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(
@@ -9,4 +9,4 @@ pub fn plugin(app: &mut App) {
             player_movement_system.after(player_input_system),
         ),
     );
-} 
+}

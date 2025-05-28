@@ -1,10 +1,7 @@
-use bevy::prelude::*;
 use super::systems::{
-    camera_input_system,
-    camera_zoom_system,
-    camera_rotation_system,
-    camera_follow_system,
+    camera_follow_system, camera_input_system, camera_rotation_system, camera_zoom_system,
 };
+use bevy::prelude::*;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(
@@ -16,4 +13,4 @@ pub fn plugin(app: &mut App) {
             camera_rotation_system.after(camera_follow_system),
         ),
     );
-} 
+}

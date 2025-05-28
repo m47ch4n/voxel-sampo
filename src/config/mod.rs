@@ -5,7 +5,6 @@ pub const PLAYER_MOVE_SPEED: f32 = 1.0;
 pub const PLAYER_MOVE_DURATION: f32 = 0.2;
 pub const CAMERA_DISTANCE: f32 = 40.0;
 pub const CAMERA_HEIGHT: f32 = 24.0;
-pub const CAMERA_ROTATION_SPEED: f32 = 360.0;
 pub const CAMERA_ANGLES: [f32; 4] = [60.0, 150.0, 240.0, 330.0];
 pub const BASE_ZOOM: f32 = 7.0;
 pub const ZOOM_OUT_VALUE: f32 = 15.0;
@@ -53,7 +52,6 @@ impl Default for PlayerConfig {
 pub struct CameraConfig {
     pub distance: f32,
     pub height: f32,
-    pub rotation_speed: f32,
     pub base_zoom: f32,
     pub zoom_out_value: f32,
 }
@@ -63,7 +61,6 @@ impl Default for CameraConfig {
         Self {
             distance: CAMERA_DISTANCE,
             height: CAMERA_HEIGHT,
-            rotation_speed: CAMERA_ROTATION_SPEED,
             base_zoom: BASE_ZOOM,
             zoom_out_value: ZOOM_OUT_VALUE,
         }
@@ -85,4 +82,4 @@ impl Default for Config {
             key_bindings: KeyBindings::default(),
         }
     }
-} 
+}

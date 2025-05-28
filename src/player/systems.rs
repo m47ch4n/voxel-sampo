@@ -1,10 +1,10 @@
-use bevy::prelude::*;
-use crate::config::Config;
-use crate::camera::CameraAngle;
 use super::components::Player;
+use crate::camera::CameraAngle;
+use crate::config::Config;
+use bevy::prelude::*;
 
 pub fn player_input_system(
-    keyboard_input: Res<ButtonInput<KeyCode>>, 
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut player_query: Query<&mut Player>,
     camera_query: Query<&CameraAngle>,
     config: Res<Config>,
@@ -15,7 +15,7 @@ pub fn player_input_system(
         }
 
         let mut direction = Vec3::ZERO;
-        
+
         if let Ok(camera_angle) = camera_query.single() {
             let forward = camera_angle.get_camera_forward_direction();
             let right = camera_angle.get_camera_right_direction();
@@ -48,7 +48,10 @@ pub fn player_input_system(
     }
 }
 
-pub fn player_movement_system(time: Res<Time>, mut player_query: Query<(&mut Player, &mut Transform)>) {
+pub fn player_movement_system(
+    time: Res<Time>,
+    mut player_query: Query<(&mut Player, &mut Transform)>,
+) {
     if let Ok((mut player, mut transform)) = player_query.single_mut() {
         if player.is_moving {
             player.move_timer.tick(time.delta());
@@ -70,4 +73,4 @@ pub fn player_movement_system(time: Res<Time>, mut player_query: Query<(&mut Pla
             }
         }
     }
-} 
+}

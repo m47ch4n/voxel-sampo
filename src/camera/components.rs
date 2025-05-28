@@ -1,5 +1,11 @@
+use crate::config::{CameraConfig, BASE_ZOOM, CAMERA_ANGLES, ZOOM_OUT_VALUE};
 use bevy::prelude::*;
-use crate::config::{CameraConfig, CAMERA_ANGLES, CAMERA_ROTATION_SPEED, BASE_ZOOM, ZOOM_OUT_VALUE};
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum RotationDirection {
+    Clockwise,
+    CounterClockwise,
+}
 
 #[derive(Component, Debug, Clone)]
 pub struct CameraAngle {
@@ -19,157 +25,124 @@ impl CameraAngle {
         let rad = self.current_angle.to_radians();
         Vec3::new(-rad.cos(), 0.0, -rad.sin()).normalize()
     }
-    
+
     pub fn get_camera_right_direction(&self) -> Vec3 {
         let forward = self.get_camera_forward_direction();
         forward.cross(Vec3::Y).normalize()
     }
 
-    pub fn get_transform_from_angle(&self, player_pos: Vec3, camera_config: &CameraConfig) -> Transform {
+    pub fn get_transform_from_angle(
+        &self,
+        player_pos: Vec3,
+        camera_config: &CameraConfig,
+    ) -> Transform {
         let rad = self.current_angle.to_radians();
         Transform::from_xyz(
             player_pos.x + camera_config.distance * rad.cos(),
             player_pos.y + camera_config.height,
-            player_pos.z + camera_config.distance * rad.sin()
-        ).looking_at(player_pos, Vec3::Y)
+            player_pos.z + camera_config.distance * rad.sin(),
+        )
+        .looking_at(player_pos, Vec3::Y)
     }
 }
 
 #[derive(Debug, Clone)]
 pub enum RotationState {
     Idle,
-    Continuous {
-        direction: bool,
-        elapsed: f32,
-        acceleration_time: f32,
-    },
-    Decelerating {
-        direction: bool,
-        elapsed: f32,
-        deceleration_time: f32,
-        initial_velocity: f32,
-    },
-    Snapping {
-        timer: Timer,
-        start_angle: f32,
+    Rotating {
+        direction: RotationDirection,
+        current_velocity: f32,
+        target_snap_index: usize,
+        momentum: f32, // accumulated rotation momentum
     },
 }
 
 #[derive(Component, Debug)]
 pub struct CameraRotationController {
-    pub rotation_speed: f32,
+    pub acceleration: f32,
+    pub deceleration: f32,
+    pub max_velocity: f32,
+    pub momentum_threshold: f32,
     pub state: RotationState,
+    pub throttle_cw: bool,  // clockwise throttle
+    pub throttle_ccw: bool, // counter-clockwise throttle
 }
 
 impl CameraRotationController {
-    pub fn new(camera_config: &CameraConfig) -> Self {
+    pub fn new(_camera_config: &CameraConfig) -> Self {
         Self {
-            rotation_speed: camera_config.rotation_speed,
+            acceleration: 720.0,  // degrees/second^2
+            deceleration: 1440.0, // degrees/second^2
+            max_velocity: 540.0,  // degrees/second
+            momentum_threshold: 270.0,
             state: RotationState::Idle,
+            throttle_cw: false,
+            throttle_ccw: false,
         }
     }
 
-    pub fn start_continuous_rotation(&mut self, clockwise: bool) {
-        if matches!(self.state, RotationState::Idle) {
-            self.state = RotationState::Continuous {
-                direction: clockwise,
-                elapsed: 0.0,
-                acceleration_time: 0.2,
-            };
+    pub fn set_throttle(&mut self, cw: bool, ccw: bool) {
+        self.throttle_cw = cw;
+        self.throttle_ccw = ccw;
+    }
+
+    pub fn get_rotation_direction(&self) -> Option<RotationDirection> {
+        match (self.throttle_cw, self.throttle_ccw) {
+            (true, false) => Some(RotationDirection::Clockwise),
+            (false, true) => Some(RotationDirection::CounterClockwise),
+            _ => None, // both or neither pressed
         }
     }
 
-    pub fn stop_continuous_rotation(&mut self) {
-        if let RotationState::Continuous { direction, elapsed, acceleration_time, .. } = self.state {
-            let acceleration_progress = (elapsed / acceleration_time).min(1.0);
-            let speed_multiplier = acceleration_progress * acceleration_progress;
-            let min_speed_ratio = 0.1;
-            let final_speed_multiplier = min_speed_ratio + (1.0 - min_speed_ratio) * speed_multiplier;
-            let initial_velocity = self.rotation_speed * final_speed_multiplier;
-
-            self.state = RotationState::Decelerating {
-                direction,
-                elapsed: 0.0,
-                deceleration_time: 0.4,
-                initial_velocity,
-            };
+    pub fn get_current_velocity(&self) -> f32 {
+        match &self.state {
+            RotationState::Rotating {
+                current_velocity, ..
+            } => *current_velocity,
+            _ => 0.0,
         }
-    }
-
-    pub fn start_snap_rotation(&mut self, start_angle: f32) {
-        self.state = RotationState::Snapping {
-            timer: Timer::from_seconds(0.5, TimerMode::Once),
-            start_angle,
-        };
-    }
-
-    pub fn is_idle(&self) -> bool {
-        matches!(self.state, RotationState::Idle)
     }
 }
 
 impl Default for CameraRotationController {
     fn default() -> Self {
         Self {
-            rotation_speed: CAMERA_ROTATION_SPEED,
+            acceleration: 720.0,
+            deceleration: 1440.0,
+            max_velocity: 540.0,
+            momentum_threshold: 270.0,
             state: RotationState::Idle,
+            throttle_cw: false,
+            throttle_ccw: false,
         }
     }
-}
-
-#[derive(Debug, Clone)]
-pub enum ZoomState {
-    Idle,
-    ZoomingOut {
-        elapsed: f32,
-        duration: f32,
-        start_zoom: f32,
-        target_zoom: f32,
-    },
-    ZoomingIn {
-        elapsed: f32,
-        duration: f32,
-        start_zoom: f32,
-        target_zoom: f32,
-    },
 }
 
 #[derive(Component, Debug)]
 pub struct CameraZoomController {
     pub base_zoom: f32,
-    pub zoom_out_value: f32,
+    pub max_zoom_out: f32,
     pub current_zoom: f32,
-    pub state: ZoomState,
+    pub zoom_speed: f32,
 }
 
 impl CameraZoomController {
     pub fn new(camera_config: &CameraConfig) -> Self {
         Self {
             base_zoom: camera_config.base_zoom,
-            zoom_out_value: camera_config.zoom_out_value,
+            max_zoom_out: camera_config.zoom_out_value,
             current_zoom: camera_config.base_zoom,
-            state: ZoomState::Idle,
+            zoom_speed: 20.0,
         }
     }
 
-    pub fn start_zoom_out(&mut self) {
-        if matches!(self.state, ZoomState::Idle) {
-            self.state = ZoomState::ZoomingOut {
-                elapsed: 0.0,
-                duration: 0.3,
-                start_zoom: self.current_zoom,
-                target_zoom: self.zoom_out_value,
-            };
-        }
-    }
+    pub fn update_zoom_for_velocity(&mut self, velocity: f32, max_velocity: f32, time_delta: f32) {
+        let velocity_ratio = (velocity / max_velocity).min(1.0);
+        let target_zoom = self.base_zoom + (self.max_zoom_out - self.base_zoom) * velocity_ratio;
 
-    pub fn start_zoom_in(&mut self) {
-        self.state = ZoomState::ZoomingIn {
-            elapsed: 0.0,
-            duration: 0.3,
-            start_zoom: self.current_zoom,
-            target_zoom: self.base_zoom,
-        };
+        let zoom_diff = target_zoom - self.current_zoom;
+        let zoom_change = zoom_diff * self.zoom_speed * time_delta;
+        self.current_zoom += zoom_change;
     }
 }
 
@@ -177,22 +150,22 @@ impl Default for CameraZoomController {
     fn default() -> Self {
         Self {
             base_zoom: BASE_ZOOM,
-            zoom_out_value: ZOOM_OUT_VALUE,
+            max_zoom_out: ZOOM_OUT_VALUE,
             current_zoom: BASE_ZOOM,
-            state: ZoomState::Idle,
+            zoom_speed: 20.0,
         }
     }
 }
 
 #[derive(Component, Debug, Clone)]
 pub struct CameraPositionController {
-    pub current_position: usize,
+    pub current_snap_index: usize,
 }
 
 impl Default for CameraPositionController {
     fn default() -> Self {
         Self {
-            current_position: 0,
+            current_snap_index: 0,
         }
     }
-} 
+}

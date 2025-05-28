@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::config::PlayerConfig;
+use bevy::prelude::*;
 
 #[derive(Component, Debug, Clone)]
 pub struct Player {
@@ -27,4 +27,4 @@ impl Default for Player {
             is_moving: false,
         }
     }
-} 
+}

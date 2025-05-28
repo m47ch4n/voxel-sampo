@@ -1,11 +1,10 @@
-use bevy::{
-    prelude::*,
-    render::camera::ScalingMode,
-};
+use bevy::{prelude::*, render::camera::ScalingMode};
 
+use crate::camera::{
+    CameraAngle, CameraPositionController, CameraRotationController, CameraZoomController,
+};
 use crate::config::Config;
 use crate::player::Player;
-use crate::camera::{CameraAngle, CameraRotationController, CameraZoomController, CameraPositionController};
 
 pub fn spawn_entities(
     mut commands: Commands,
@@ -34,18 +33,19 @@ fn spawn_player(
             base_color: Color::WHITE,
             ..default()
         })),
-        Transform::from_xyz(initial_player_pos.x, initial_player_pos.y, initial_player_pos.z),
+        Transform::from_xyz(
+            initial_player_pos.x,
+            initial_player_pos.y,
+            initial_player_pos.z,
+        ),
     ));
 }
 
-fn spawn_camera(
-    commands: &mut Commands,
-    config: &Res<Config>,
-) {
+fn spawn_camera(commands: &mut Commands, config: &Res<Config>) {
     let rotation_controller = CameraRotationController::new(&config.camera);
     let zoom_controller = CameraZoomController::new(&config.camera);
     let camera_angle = CameraAngle::default();
-    
+
     // カメラの初期位置を設定に基づいて計算
     let initial_transform = camera_angle.get_transform_from_angle(Vec3::ZERO, &config.camera);
 
@@ -53,7 +53,9 @@ fn spawn_camera(
         Camera3d::default(),
         initial_transform,
         Projection::Orthographic(OrthographicProjection {
-            scaling_mode: ScalingMode::FixedVertical { viewport_height: config.camera.base_zoom },
+            scaling_mode: ScalingMode::FixedVertical {
+                viewport_height: config.camera.base_zoom,
+            },
             near: -1000.0,
             far: 1000.0,
             ..OrthographicProjection::default_3d()
@@ -65,10 +67,7 @@ fn spawn_camera(
     ));
 }
 
-fn spawn_room(
-    commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
-) {
+fn spawn_room(commands: &mut Commands, asset_server: &Res<AssetServer>) {
     commands.spawn((
         SceneRoot(asset_server.load("room.vox")),
         Transform::from_scale(Vec3::splat(0.05)),
@@ -84,4 +83,4 @@ fn spawn_lighting(commands: &mut Commands) {
         },
         Transform::IDENTITY.looking_to(Vec3::new(1.0, -2.5, 0.85), Vec3::Y),
     ));
-} 
+}

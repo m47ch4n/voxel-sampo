@@ -1,13 +1,10 @@
-use bevy::{
-    prelude::*,
-    window::WindowResolution,
-};
+use bevy::{prelude::*, window::WindowResolution};
 use bevy_panorbit_camera::PanOrbitCameraPlugin;
 use bevy_vox_scene::VoxScenePlugin;
 
+mod camera;
 mod config;
 mod player;
-mod camera;
 mod spawn;
 
 use config::Config;
@@ -27,14 +24,14 @@ fn main() {
     });
 
     app.add_plugins((
-            window_plugins,
-            PanOrbitCameraPlugin,
-            VoxScenePlugin::default(),
-            player::plugin,
-            camera::plugin,
-        ))
-        .init_resource::<Config>()
-        .add_systems(Startup, spawn_entities);
+        window_plugins,
+        PanOrbitCameraPlugin,
+        VoxScenePlugin::default(),
+        player::plugin,
+        camera::plugin,
+    ))
+    .init_resource::<Config>()
+    .add_systems(Startup, spawn_entities);
 
     app.run();
 }
