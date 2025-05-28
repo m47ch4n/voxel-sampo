@@ -68,9 +68,7 @@ pub fn camera_rotation_system(
                 if let Some(direction) = rotation_controller.get_rotation_direction() {
                     let current_index = position_controller.current_snap_index;
                     let target_index = match direction {
-                        RotationDirection::Clockwise => {
-                            (current_index + 1) % CAMERA_ANGLES.len()
-                        }
+                        RotationDirection::Clockwise => (current_index + 1) % CAMERA_ANGLES.len(),
                         RotationDirection::CounterClockwise => {
                             if current_index == 0 {
                                 CAMERA_ANGLES.len() - 1

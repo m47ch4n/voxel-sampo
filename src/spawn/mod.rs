@@ -1,11 +1,9 @@
 use bevy::{
+    core_pipeline::{
+        bloom::Bloom, core_3d::ScreenSpaceTransmissionQuality, tonemapping::Tonemapping,
+    },
     prelude::*,
     render::camera::ScalingMode,
-    core_pipeline::{
-        bloom::Bloom,
-        core_3d::ScreenSpaceTransmissionQuality,
-        tonemapping::Tonemapping,
-    },
 };
 
 use crate::camera::{
