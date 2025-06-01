@@ -1,5 +1,6 @@
 use bevy::{prelude::*, window::WindowResolution};
 use bevy_vox_scene::VoxScenePlugin;
+use bevy_rapier3d::prelude::*;
 
 mod camera;
 mod config;
@@ -25,6 +26,8 @@ fn main() {
     app.add_plugins((
         window_plugins,
         VoxScenePlugin::default(),
+        RapierPhysicsPlugin::<NoUserData>::default(),
+        RapierDebugRenderPlugin::default(),
         player::plugin,
         camera::plugin,
     ))

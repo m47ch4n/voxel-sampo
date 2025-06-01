@@ -2,18 +2,15 @@ use super::components::Player;
 use crate::camera::CameraAngle;
 use crate::config::Config;
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 pub fn player_input_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut player_query: Query<&mut Player>,
+    mut player_query: Query<(&Player, &mut ExternalForce), With<Player>>,
     camera_query: Query<&CameraAngle>,
     config: Res<Config>,
 ) {
-    if let Ok(mut player) = player_query.single_mut() {
-        if player.is_moving {
-            return;
-        }
-
+    if let Ok((player, mut external_force)) = player_query.single_mut() {
         let mut direction = Vec3::ZERO;
 
         if let Ok(camera_angle) = camera_query.single() {
@@ -34,43 +31,35 @@ pub fn player_input_system(
             }
         }
 
+        // 水平方向の移動のみ（Y軸は0にする）
+        direction.y = 0.0;
+        
+        // 元の4方向移動システムを再現：東西南北のいずれかに制限
         if direction.length() > 0.0 {
             if direction.x.abs() > direction.z.abs() {
+                // X軸方向が優勢：東西移動
                 direction = Vec3::new(direction.x.signum(), 0.0, 0.0);
             } else {
+                // Z軸方向が優勢：南北移動
                 direction = Vec3::new(0.0, 0.0, direction.z.signum());
             }
-
-            player.target_position += direction * config.player.move_speed;
-            player.is_moving = true;
-            player.move_timer.reset();
+            external_force.force = direction * player.move_force;
+        } else {
+            external_force.force = Vec3::ZERO;
         }
     }
 }
 
-pub fn player_movement_system(
-    time: Res<Time>,
-    mut player_query: Query<(&mut Player, &mut Transform)>,
+pub fn player_velocity_limit_system(
+    mut player_query: Query<(&Player, &mut Velocity), With<Player>>,
 ) {
-    if let Ok((mut player, mut transform)) = player_query.single_mut() {
-        if player.is_moving {
-            player.move_timer.tick(time.delta());
-
-            let start_pos = transform.translation;
-            let progress =
-                player.move_timer.elapsed_secs() / player.move_timer.duration().as_secs_f32();
-
-            if progress >= 1.0 {
-                transform.translation = player.target_position;
-                player.is_moving = false;
-            } else {
-                let eased_progress = if progress < 0.5 {
-                    2.0 * progress * progress
-                } else {
-                    1.0 - 2.0 * (1.0 - progress) * (1.0 - progress)
-                };
-                transform.translation = start_pos.lerp(player.target_position, eased_progress);
-            }
+    if let Ok((player, mut velocity)) = player_query.single_mut() {
+        // 水平方向の速度制限
+        let mut horizontal_velocity = Vec3::new(velocity.linvel.x, 0.0, velocity.linvel.z);
+        if horizontal_velocity.length() > player.max_speed {
+            horizontal_velocity = horizontal_velocity.normalize() * player.max_speed;
+            velocity.linvel.x = horizontal_velocity.x;
+            velocity.linvel.z = horizontal_velocity.z;
         }
     }
 }

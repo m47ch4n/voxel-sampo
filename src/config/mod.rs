@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-pub const PLAYER_MOVE_SPEED: f32 = 1.0;
-pub const PLAYER_MOVE_DURATION: f32 = 0.2;
+pub const PLAYER_MOVE_FORCE: f32 = 80.0;
+pub const PLAYER_MAX_SPEED: f32 = 4.0;
 pub const CAMERA_DISTANCE: f32 = 40.0;
 pub const CAMERA_HEIGHT: f32 = 24.0;
 pub const CAMERA_ANGLES: [f32; 4] = [60.0, 150.0, 240.0, 330.0];
@@ -33,15 +33,15 @@ impl Default for KeyBindings {
 
 #[derive(Debug, Clone)]
 pub struct PlayerConfig {
-    pub move_speed: f32,
-    pub move_duration: f32,
+    pub move_force: f32,
+    pub max_speed: f32,
 }
 
 impl Default for PlayerConfig {
     fn default() -> Self {
         Self {
-            move_speed: PLAYER_MOVE_SPEED,
-            move_duration: PLAYER_MOVE_DURATION,
+            move_force: PLAYER_MOVE_FORCE,
+            max_speed: PLAYER_MAX_SPEED,
         }
     }
 }

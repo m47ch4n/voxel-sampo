@@ -5,6 +5,7 @@ use bevy::{
     prelude::*,
     render::camera::ScalingMode,
 };
+use bevy_rapier3d::prelude::*;
 
 use crate::camera::{
     CameraAngle, CameraPositionController, CameraRotationController, CameraZoomController,
@@ -23,6 +24,7 @@ pub fn spawn_entities(
     spawn_camera(&mut commands, &config);
     spawn_lighting(&mut commands, &asset_server);
     spawn_room(&mut commands, &asset_server);
+    spawn_floor(&mut commands, &mut meshes, &mut materials);
 }
 
 fn spawn_player(
@@ -31,7 +33,7 @@ fn spawn_player(
     materials: &mut ResMut<Assets<StandardMaterial>>,
     config: &Res<Config>,
 ) {
-    let initial_player_pos = Vec3::new(0.0, 0.5, 0.0);
+    let initial_player_pos = Vec3::new(0.0, 1.0, 0.0);
     commands.spawn((
         Player::new_with_config(&config.player),
         Mesh3d(meshes.add(Mesh::from(Cuboid::new(0.5, 0.5, 0.5)))),
@@ -47,6 +49,16 @@ fn spawn_player(
             initial_player_pos.y,
             initial_player_pos.z,
         ),
+        RigidBody::Dynamic,
+        Collider::cuboid(0.25, 0.25, 0.25),
+        ExternalForce::default(),
+        Velocity::default(),
+        Restitution::coefficient(0.0),
+        Friction::coefficient(1.5),
+        Damping {
+            linear_damping: 8.0,
+            angular_damping: 1.0,
+        },
     ));
 }
 
@@ -92,6 +104,25 @@ fn spawn_room(commands: &mut Commands, asset_server: &Res<AssetServer>) {
     commands.spawn((
         SceneRoot(asset_server.load("room.vox")),
         Transform::from_scale(Vec3::splat(0.05)),
+    ));
+}
+
+fn spawn_floor(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+) {
+    commands.spawn((
+        Mesh3d(meshes.add(Mesh::from(Cuboid::new(20.0, 0.2, 20.0)))),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: Color::srgb(0.5, 0.5, 0.5),
+            metallic: 0.0,
+            perceptual_roughness: 0.8,
+            ..default()
+        })),
+        Transform::from_xyz(0.0, -0.1, 0.0),
+        RigidBody::Fixed,
+        Collider::cuboid(10.0, 0.1, 10.0),
     ));
 }
 

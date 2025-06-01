@@ -3,17 +3,15 @@ use bevy::prelude::*;
 
 #[derive(Component, Debug, Clone)]
 pub struct Player {
-    pub move_timer: Timer,
-    pub target_position: Vec3,
-    pub is_moving: bool,
+    pub move_force: f32,
+    pub max_speed: f32,
 }
 
 impl Player {
     pub fn new_with_config(player_config: &PlayerConfig) -> Self {
         Self {
-            move_timer: Timer::from_seconds(player_config.move_duration, TimerMode::Once),
-            target_position: Vec3::new(0.0, 0.5, 0.0),
-            is_moving: false,
+            move_force: player_config.move_force,
+            max_speed: player_config.max_speed,
         }
     }
 }
@@ -22,9 +20,8 @@ impl Default for Player {
     fn default() -> Self {
         let default_config = PlayerConfig::default();
         Self {
-            move_timer: Timer::from_seconds(default_config.move_duration, TimerMode::Once),
-            target_position: Vec3::new(0.0, 0.5, 0.0),
-            is_moving: false,
+            move_force: default_config.move_force,
+            max_speed: default_config.max_speed,
         }
     }
 }
