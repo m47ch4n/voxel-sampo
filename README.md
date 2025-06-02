@@ -27,6 +27,7 @@ cargo run
 - `WASD` to move
 - `Q` to rotate camera counter-clockwise
 - `E` to rotate camera clockwise
+- `F3` to toggle debug mode
 
 ## Technologies & Libraries
 
