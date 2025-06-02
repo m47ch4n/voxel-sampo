@@ -1,8 +1,15 @@
 # voxel sampo
 
+```
+       _  _   __  _  _  ____  __      ____   __   _  _  ____   __        
+      / )( \ /  \( \/ )(  __)(  )    / ___) / _\ ( \/ )(  _ \ /  \       
+      \ \/ /(  O ))  (  ) _) / (_/\  \___ \/    \/ \/ \ ) __/(  O )      
+       \__/  \__/(_/\_)(____)\____/  (____/\_/\_/\_)(_/(__)   \__/       
+```
+
 ![screenshot](https://github.com/m47ch4n/voxel-sampo/blob/main/etc/screenshot.png?raw=true)
 
-A voxel-based 3D scene viewer built with the Bevy engine. Explore scenes by orbiting around with the camera.
+A voxel-based 3D scene viewer built with the Bevy engine. 
 
 ## Requirements
 

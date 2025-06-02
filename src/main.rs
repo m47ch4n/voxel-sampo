@@ -4,6 +4,7 @@ use bevy_rapier3d::prelude::*;
 
 mod camera;
 mod config;
+mod debug;
 mod player;
 mod spawn;
 
@@ -23,13 +24,19 @@ fn main() {
         ..default()
     });
 
+    let debug_render_plugin = RapierDebugRenderPlugin {
+        enabled: false,
+        ..default()
+    };
+
     app.add_plugins((
         window_plugins,
         VoxScenePlugin::default(),
         RapierPhysicsPlugin::<NoUserData>::default(),
-        RapierDebugRenderPlugin::default(),
+        debug_render_plugin,
         player::plugin,
         camera::plugin,
+        debug::plugin,
     ))
     .init_resource::<Config>()
     .add_systems(Startup, spawn_entities);

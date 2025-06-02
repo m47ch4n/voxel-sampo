@@ -2,7 +2,7 @@
 name = "voxel-sampo"
 version = "0.1.0"
 edition = "2021"
-description = "A voxel-based scene with a camera that orbits around the scene."
+description = "A voxel-based 3D scene viewer built with the Bevy engine."
 repository = "https://github.com/m47ch4n/voxel-sampo"
 license = "MIT"
 

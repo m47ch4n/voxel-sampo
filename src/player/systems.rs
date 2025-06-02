@@ -31,16 +31,12 @@ pub fn player_input_system(
             }
         }
 
-        // 水平方向の移動のみ（Y軸は0にする）
         direction.y = 0.0;
         
-        // 元の4方向移動システムを再現：東西南北のいずれかに制限
         if direction.length() > 0.0 {
             if direction.x.abs() > direction.z.abs() {
-                // X軸方向が優勢：東西移動
                 direction = Vec3::new(direction.x.signum(), 0.0, 0.0);
             } else {
-                // Z軸方向が優勢：南北移動
                 direction = Vec3::new(0.0, 0.0, direction.z.signum());
             }
             external_force.force = direction * player.move_force;
@@ -54,7 +50,6 @@ pub fn player_velocity_limit_system(
     mut player_query: Query<(&Player, &mut Velocity), With<Player>>,
 ) {
     if let Ok((player, mut velocity)) = player_query.single_mut() {
-        // 水平方向の速度制限
         let mut horizontal_velocity = Vec3::new(velocity.linvel.x, 0.0, velocity.linvel.z);
         if horizontal_velocity.length() > player.max_speed {
             horizontal_velocity = horizontal_velocity.normalize() * player.max_speed;
