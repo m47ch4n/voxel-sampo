@@ -10,4 +10,4 @@ pub struct DebugState {
 pub struct DebugText;
 
 #[derive(Component)]
-pub struct DebugOverlay; 
+pub struct DebugOverlay;

@@ -5,6 +5,12 @@ use bevy::prelude::*;
 pub struct Player {
     pub move_force: f32,
     pub max_speed: f32,
+    pub jump_force: f32,
+}
+
+#[derive(Component, Debug, Clone)]
+pub struct GroundedState {
+    pub is_grounded: bool,
 }
 
 impl Player {
@@ -12,6 +18,7 @@ impl Player {
         Self {
             move_force: player_config.move_force,
             max_speed: player_config.max_speed,
+            jump_force: player_config.jump_force,
         }
     }
 }
@@ -22,6 +29,7 @@ impl Default for Player {
         Self {
             move_force: default_config.move_force,
             max_speed: default_config.max_speed,
+            jump_force: default_config.jump_force,
         }
     }
 }

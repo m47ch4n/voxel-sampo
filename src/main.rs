@@ -1,6 +1,6 @@
 use bevy::{prelude::*, window::WindowResolution};
-use bevy_vox_scene::VoxScenePlugin;
 use bevy_rapier3d::prelude::*;
+use bevy_vox_scene::VoxScenePlugin;
 
 mod camera;
 mod config;

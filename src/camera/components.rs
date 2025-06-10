@@ -157,15 +157,7 @@ impl Default for CameraZoomController {
     }
 }
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Debug, Clone, Default)]
 pub struct CameraPositionController {
     pub current_snap_index: usize,
-}
-
-impl Default for CameraPositionController {
-    fn default() -> Self {
-        Self {
-            current_snap_index: 0,
-        }
-    }
 }

@@ -124,7 +124,7 @@ pub fn camera_rotation_system(
                     }
                 }
 
-                camera_angle.current_angle = camera_angle.current_angle % 360.0;
+                camera_angle.current_angle %= 360.0;
                 if camera_angle.current_angle < 0.0 {
                     camera_angle.current_angle += 360.0;
                 }

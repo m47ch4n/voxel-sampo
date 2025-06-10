@@ -11,7 +11,7 @@ use crate::camera::{
     CameraAngle, CameraPositionController, CameraRotationController, CameraZoomController,
 };
 use crate::config::Config;
-use crate::player::Player;
+use crate::player::{GroundedState, Player};
 
 pub fn spawn_entities(
     mut commands: Commands,
@@ -35,6 +35,7 @@ fn spawn_player(
     let initial_player_pos = Vec3::new(0.0, 1.0, 0.0);
     commands.spawn((
         Player::new_with_config(&config.player),
+        GroundedState { is_grounded: false },
         Mesh3d(meshes.add(Mesh::from(Cuboid::new(0.5, 0.5, 0.5)))),
         MeshMaterial3d(materials.add(StandardMaterial {
             base_color: Color::srgb(0.8, 0.8, 0.9),
@@ -55,9 +56,11 @@ fn spawn_player(
         Restitution::coefficient(0.0),
         Friction::coefficient(1.5),
         Damping {
-            linear_damping: 8.0,
+            linear_damping: 0.5,
             angular_damping: 1.0,
         },
+        LockedAxes::ROTATION_LOCKED,
+        GravityScale(1.0),
     ));
 }
 
@@ -110,7 +113,6 @@ fn spawn_room(commands: &mut Commands, asset_server: &Res<AssetServer>) {
         },
     ));
 }
-
 
 fn spawn_lighting(commands: &mut Commands, asset_server: &Res<AssetServer>) {
     commands.spawn(EnvironmentMapLight {

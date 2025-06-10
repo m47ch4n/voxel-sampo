@@ -1,8 +1,8 @@
+use super::components::*;
+use crate::camera::CameraAngle;
+use crate::player::Player;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-use crate::player::Player;
-use crate::camera::CameraAngle;
-use super::components::*;
 
 pub fn toggle_debug_mode(
     mut debug_state: ResMut<DebugState>,
@@ -49,15 +49,9 @@ pub fn setup_debug_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
         });
 }
 
-pub fn update_debug_info(
+pub fn toggle_debug_visibility(
     debug_state: Res<DebugState>,
     mut debug_overlay_query: Query<&mut Visibility, (With<DebugOverlay>, Without<DebugText>)>,
-    mut debug_text_query: Query<&mut Text, With<DebugText>>,
-    player_query: Query<&Transform, With<Player>>,
-    camera_query: Query<&CameraAngle>,
-    entity_query: Query<Entity>,
-    rigidbody_query: Query<&Velocity, With<RigidBody>>,
-    time: Res<Time>,
 ) {
     for mut visibility in debug_overlay_query.iter_mut() {
         *visibility = if debug_state.enabled {
@@ -66,7 +60,17 @@ pub fn update_debug_info(
             Visibility::Hidden
         };
     }
+}
 
+pub fn update_debug_text(
+    debug_state: Res<DebugState>,
+    mut debug_text_query: Query<&mut Text, With<DebugText>>,
+    player_query: Query<&Transform, With<Player>>,
+    camera_query: Query<&CameraAngle>,
+    entity_query: Query<Entity>,
+    rigidbody_query: Query<&Velocity, With<RigidBody>>,
+    time: Res<Time>,
+) {
     if !debug_state.enabled {
         return;
     }
@@ -74,17 +78,28 @@ pub fn update_debug_info(
     for mut text in debug_text_query.iter_mut() {
         let mut debug_info = String::new();
 
-        debug_info.push_str("        _  _   __  _  _  ____  __      ____   __   _  _  ____   __        \n");
-        debug_info.push_str("       / )( \\ /  \\( \\/ )(  __)(  )    / ___) / _\\ ( \\/ )(  _ \\ /  \\       \n");
-        debug_info.push_str("       \\ \\/ /(  O ))  (  ) _) / (_/\\  \\___ \\/    \\/ \\/ \\ ) __/(  O )      \n");
-        debug_info.push_str("        \\__/  \\__/(_/\\_)(____)\\_____/ (____/\\_/\\_/\\_)(_/(__)   \\__/       \n");
-        debug_info.push_str("\n");
+        debug_info.push_str(
+            "        _  _   __  _  _  ____  __      ____   __   _  _  ____   __        \n",
+        );
+        debug_info.push_str(
+            "       / )( \\ /  \\( \\/ )(  __)(  )    / ___) / _\\ ( \\/ )(  _ \\ /  \\       \n",
+        );
+        debug_info.push_str(
+            "       \\ \\/ /(  O ))  (  ) _) / (_/\\  \\___ \\/    \\/ \\/ \\ ) __/(  O )      \n",
+        );
+        debug_info.push_str(
+            "        \\__/  \\__/(_/\\_)(____)\\_____/ (____/\\_/\\_/\\_)(_/(__)   \\__/       \n",
+        );
+        debug_info.push('\n');
         debug_info.push_str(&format!("v{}\n", env!("CARGO_PKG_VERSION")));
         debug_info.push_str("Debug Screen (F3 to toggle)\n\n");
-        
+
         debug_info.push_str(&format!("FPS: {:.1}\n", 1.0 / time.delta().as_secs_f32()));
         debug_info.push_str(&format!("Entities: {}\n", entity_query.iter().count()));
-        debug_info.push_str(&format!("RigidBodies: {}\n\n", rigidbody_query.iter().count()));
+        debug_info.push_str(&format!(
+            "RigidBodies: {}\n\n",
+            rigidbody_query.iter().count()
+        ));
 
         if let Ok(player_transform) = player_query.single() {
             let pos = player_transform.translation;
@@ -95,7 +110,7 @@ pub fn update_debug_info(
             debug_info.push_str(&format!(
                 "Block: {} {} {}\n\n",
                 pos.x.floor() as i32,
-                pos.y.floor() as i32, 
+                pos.y.floor() as i32,
                 pos.z.floor() as i32
             ));
 
@@ -124,11 +139,11 @@ pub fn update_debug_info(
             } else {
                 "Unknown"
             };
-            debug_info.push_str(&format!("Facing: {}\n", facing));
+            debug_info.push_str(&format!("Facing: {facing}\n"));
         } else {
             debug_info.push_str("Facing: Unknown\n");
         }
-        
+
         **text = debug_info;
     }
-} 
+}
