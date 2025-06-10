@@ -6,6 +6,7 @@ pub struct Player {
     pub move_force: f32,
     pub max_speed: f32,
     pub jump_force: f32,
+    pub air_control_force: f32,
 }
 
 #[derive(Component, Debug, Clone)]
@@ -19,6 +20,7 @@ impl Player {
             move_force: player_config.move_force,
             max_speed: player_config.max_speed,
             jump_force: player_config.jump_force,
+            air_control_force: player_config.air_control_force,
         }
     }
 }
@@ -30,6 +32,7 @@ impl Default for Player {
             move_force: default_config.move_force,
             max_speed: default_config.max_speed,
             jump_force: default_config.jump_force,
+            air_control_force: default_config.air_control_force,
         }
     }
 }

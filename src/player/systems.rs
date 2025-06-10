@@ -35,13 +35,18 @@ pub fn player_input_system(
 
         let mut force = Vec3::ZERO;
 
-        if direction.length() > 0.0 && grounded_state.is_grounded {
+        if direction.length() > 0.0 {
             if direction.x.abs() > direction.z.abs() {
                 direction = Vec3::new(direction.x.signum(), 0.0, 0.0);
             } else {
                 direction = Vec3::new(0.0, 0.0, direction.z.signum());
             }
-            force += direction * player.move_force;
+
+            if grounded_state.is_grounded {
+                force += direction * player.move_force;
+            } else {
+                force += direction * player.air_control_force;
+            }
         }
 
         if keyboard_input.just_pressed(config.key_bindings.player_jump)

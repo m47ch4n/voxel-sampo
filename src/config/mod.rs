@@ -3,6 +3,7 @@ use bevy::prelude::*;
 pub const PLAYER_MOVE_FORCE: f32 = 80.0;
 pub const PLAYER_MAX_SPEED: f32 = 4.0;
 pub const PLAYER_JUMP_FORCE: f32 = 50.0;
+pub const PLAYER_AIR_CONTROL_FORCE: f32 = 2.0;
 pub const CAMERA_DISTANCE: f32 = 40.0;
 pub const CAMERA_HEIGHT: f32 = 24.0;
 pub const CAMERA_ANGLES: [f32; 4] = [60.0, 150.0, 240.0, 330.0];
@@ -39,6 +40,7 @@ pub struct PlayerConfig {
     pub move_force: f32,
     pub max_speed: f32,
     pub jump_force: f32,
+    pub air_control_force: f32,
 }
 
 impl Default for PlayerConfig {
@@ -47,6 +49,7 @@ impl Default for PlayerConfig {
             move_force: PLAYER_MOVE_FORCE,
             max_speed: PLAYER_MAX_SPEED,
             jump_force: PLAYER_JUMP_FORCE,
+            air_control_force: PLAYER_AIR_CONTROL_FORCE,
         }
     }
 }
