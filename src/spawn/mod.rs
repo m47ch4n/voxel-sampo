@@ -54,7 +54,7 @@ fn spawn_player(
         ExternalForce::default(),
         Velocity::default(),
         Restitution::coefficient(0.0),
-        Friction::coefficient(1.5),
+        Friction::coefficient(0.3),
         Damping {
             linear_damping: 0.5,
             angular_damping: 1.0,

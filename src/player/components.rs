@@ -14,6 +14,7 @@ pub struct GroundedState {
     pub is_grounded: bool,
 }
 
+
 impl Player {
     pub fn new_with_config(player_config: &PlayerConfig) -> Self {
         Self {
