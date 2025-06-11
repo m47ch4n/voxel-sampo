@@ -4,7 +4,7 @@ use bevy_vox_scene::VoxScenePlugin;
 
 mod camera;
 mod config;
-mod debug;
+mod debug_ui;
 mod entities;
 mod physics;
 mod player;
@@ -39,7 +39,7 @@ fn main() {
         debug_render_plugin,
         player::plugin,
         camera::plugin,
-        debug::plugin,
+        debug_ui::plugin,
         physics::plugin,
         world::plugin,
     ))

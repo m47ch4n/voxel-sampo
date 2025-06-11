@@ -1,0 +1,108 @@
+use crate::player::{GroundedState, Player};
+use crate::physics::{DynamicDamping, GroundDetection};
+use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
+
+pub struct PhysicsInfo {
+    pub is_grounded: bool,
+    pub ground_detection_config: Option<GroundDetection>,
+    pub damping_config: Option<DynamicDamping>,
+    pub current_damping: Option<Damping>,
+    pub gravity_scale: Option<f32>,
+    pub friction: Option<f32>,
+    pub restitution: Option<f32>,
+    pub present: bool,
+}
+
+impl PhysicsInfo {
+    pub fn from_queries(
+        player_query: &Query<
+            (
+                &GroundedState,
+                &GroundDetection,
+                &DynamicDamping,
+                &Damping,
+                &GravityScale,
+                &Friction,
+                &Restitution,
+            ),
+            With<Player>,
+        >,
+    ) -> Self {
+        if let Ok((
+            grounded_state,
+            ground_detection,
+            dynamic_damping,
+            damping,
+            gravity_scale,
+            friction,
+            restitution,
+        )) = player_query.single()
+        {
+            Self {
+                is_grounded: grounded_state.is_grounded,
+                ground_detection_config: Some(ground_detection.clone()),
+                damping_config: Some(dynamic_damping.clone()),
+                current_damping: Some(damping.clone()),
+                gravity_scale: Some(gravity_scale.0),
+                friction: Some(friction.coefficient),
+                restitution: Some(restitution.coefficient),
+                present: true,
+            }
+        } else {
+            Self {
+                is_grounded: false,
+                ground_detection_config: None,
+                damping_config: None,
+                current_damping: None,
+                gravity_scale: None,
+                friction: None,
+                restitution: None,
+                present: false,
+            }
+        }
+    }
+
+    pub fn format(&self) -> String {
+        if !self.present {
+            return "Physics: Not found".to_string();
+        }
+
+        let mut info = format!("Grounded: {}", if self.is_grounded { "Yes" } else { "No" });
+
+        if let Some(damping) = &self.current_damping {
+            info.push_str(&format!(
+                "\nDamping: Linear {:.1}, Angular {:.1}",
+                damping.linear_damping, damping.angular_damping
+            ));
+        }
+
+        if let Some(gravity) = self.gravity_scale {
+            info.push_str(&format!("\nGravity Scale: {:.1}", gravity));
+        }
+
+        if let Some(friction) = self.friction {
+            info.push_str(&format!("\nFriction: {:.2}", friction));
+        }
+
+        if let Some(restitution) = self.restitution {
+            info.push_str(&format!("\nRestitution: {:.2}", restitution));
+        }
+
+        if let Some(ground_detection) = &self.ground_detection_config {
+            info.push_str(&format!(
+                "\nGround Detection:\n  Velocity < {:.2}\n  Height <= {:.2}",
+                ground_detection.velocity_threshold, ground_detection.height_threshold
+            ));
+        }
+
+        if let Some(damping_config) = &self.damping_config {
+            info.push_str(&format!(
+                "\nDamping Config:\n  Ground: {:.1}, Air: {:.1}",
+                damping_config.ground_damping, damping_config.air_damping
+            ));
+        }
+
+        info
+    }
+}
