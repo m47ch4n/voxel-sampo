@@ -7,7 +7,7 @@
        \__/  \__/(_/\_)(____)\____/  (____/\_/\_/\_)(_/(__)   \__/       
 ```
 
-![screenshot](https://github.com/m47ch4n/voxel-sampo/blob/main/etc/screenshot.png?raw=true)
+![animation](https://github.com/m47ch4n/voxel-sampo/blob/main/etc/sampo.gif?raw=true)
 
 A voxel-based 3D scene viewer built with the Bevy engine featuring physics-based player movement with jumping mechanics. 
 
