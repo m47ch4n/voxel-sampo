@@ -71,30 +71,3 @@ pub fn player_velocity_limit_system(
         }
     }
 }
-
-pub fn ground_detection_system(
-    mut player_query: Query<(&mut GroundedState, &Transform, &Velocity), With<Player>>,
-) {
-    if let Ok((mut grounded_state, transform, velocity)) = player_query.single_mut() {
-        grounded_state.is_grounded =
-            velocity.linvel.y.abs() < 0.1 && transform.translation.y <= 1.1;
-    }
-}
-
-pub fn player_rotation_lock_system(mut player_query: Query<&mut Transform, With<Player>>) {
-    if let Ok(mut transform) = player_query.single_mut() {
-        transform.rotation = Quat::IDENTITY;
-    }
-}
-
-pub fn dynamic_damping_system(
-    mut player_query: Query<(&GroundedState, &mut Damping), With<Player>>,
-) {
-    if let Ok((grounded_state, mut damping)) = player_query.single_mut() {
-        if grounded_state.is_grounded {
-            damping.linear_damping = 8.0;
-        } else {
-            damping.linear_damping = 0.1;
-        }
-    }
-}

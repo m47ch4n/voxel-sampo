@@ -5,8 +5,11 @@ use bevy_vox_scene::VoxScenePlugin;
 mod camera;
 mod config;
 mod debug;
+mod entities;
+mod physics;
 mod player;
 mod spawn;
+mod world;
 
 use config::Config;
 use spawn::spawn_entities;
@@ -37,6 +40,8 @@ fn main() {
         player::plugin,
         camera::plugin,
         debug::plugin,
+        physics::plugin,
+        world::plugin,
     ))
     .init_resource::<Config>()
     .add_systems(Startup, spawn_entities);
