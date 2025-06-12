@@ -4,7 +4,7 @@ use super::{
     world::WorldInfo,
 };
 use crate::camera::CameraAngle;
-use crate::physics::{DynamicDamping, GroundDetection};
+use crate::physics::{DynamicDamping, GroundDetection, GroundRay};
 use crate::player::{GroundedState, Player};
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
@@ -22,6 +22,7 @@ pub fn update_debug_text(
             &GravityScale,
             &Friction,
             &Restitution,
+            &GroundRay,
         ),
         With<Player>,
     >,
@@ -61,6 +62,7 @@ fn compose_debug_info(
             &GravityScale,
             &Friction,
             &Restitution,
+            &GroundRay,
         ),
         With<Player>,
     >,
@@ -68,11 +70,9 @@ fn compose_debug_info(
 ) -> String {
     let mut debug_info = String::new();
 
-    // Header section
     debug_info.push_str(&get_header_section());
     debug_info.push('\n');
 
-    // Performance section
     let fps_info = FpsInfo::from_time(time);
     let performance_info = PerformanceInfo::from_queries(entity_query, rigidbody_query);
     debug_info.push_str(&fps_info.format());
@@ -80,17 +80,14 @@ fn compose_debug_info(
     debug_info.push_str(&performance_info.format());
     debug_info.push_str("\n\n");
 
-    // Player section
     let player_info = PlayerInfo::from_queries(player_query, rigidbody_query);
     debug_info.push_str(&player_info.format());
     debug_info.push_str("\n\n");
 
-    // Physics section
     let physics_info = PhysicsInfo::from_queries(physics_query);
     debug_info.push_str(&physics_info.format());
     debug_info.push_str("\n\n");
 
-    // World section
     let world_info = WorldInfo::from_camera_query(camera_query);
     debug_info.push_str(&world_info.format());
 

@@ -1,5 +1,5 @@
 use crate::player::{GroundedState, Player};
-use crate::physics::{DynamicDamping, GroundDetection};
+use crate::physics::{DynamicDamping, GroundDetection, GroundRay};
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
@@ -11,6 +11,7 @@ pub struct PhysicsInfo {
     pub gravity_scale: Option<f32>,
     pub friction: Option<f32>,
     pub restitution: Option<f32>,
+    pub ground_ray: Option<GroundRay>,
     pub present: bool,
 }
 
@@ -25,6 +26,7 @@ impl PhysicsInfo {
                 &GravityScale,
                 &Friction,
                 &Restitution,
+                &GroundRay,
             ),
             With<Player>,
         >,
@@ -37,6 +39,7 @@ impl PhysicsInfo {
             gravity_scale,
             friction,
             restitution,
+            ground_ray,
         )) = player_query.single()
         {
             Self {
@@ -48,6 +51,7 @@ impl PhysicsInfo {
                 friction: Some(friction.coefficient),
                 restitution: Some(restitution.coefficient),
                 present: true,
+                ground_ray: Some(ground_ray.clone()),
             }
         } else {
             Self {
@@ -59,6 +63,7 @@ impl PhysicsInfo {
                 friction: None,
                 restitution: None,
                 present: false,
+                ground_ray: None,
             }
         }
     }
@@ -69,6 +74,20 @@ impl PhysicsInfo {
         }
 
         let mut info = format!("Grounded: {}", if self.is_grounded { "Yes" } else { "No" });
+
+        if let Some(ground_detection) = &self.ground_detection_config {
+            info.push_str(&format!(
+                "\nGround Detection:\n  Ray Distance: {:.2}",
+                ground_detection.ray_distance
+            ));
+        }
+
+        if let Some(ground_ray) = &self.ground_ray {
+            info.push_str(&format!(
+                "\nGround Ray:\n  Origin: {:?}\n  Direction: {:?}\n  Distance: {:.2}\n  Hit Point: {:?}",
+                ground_ray.origin, ground_ray.direction, ground_ray.distance, ground_ray.hit_point
+            ));
+        }
 
         if let Some(damping) = &self.current_damping {
             info.push_str(&format!(
@@ -89,13 +108,6 @@ impl PhysicsInfo {
             info.push_str(&format!("\nRestitution: {:.2}", restitution));
         }
 
-        if let Some(ground_detection) = &self.ground_detection_config {
-            info.push_str(&format!(
-                "\nGround Detection:\n  Velocity < {:.2}\n  Height <= {:.2}",
-                ground_detection.velocity_threshold, ground_detection.height_threshold
-            ));
-        }
-
         if let Some(damping_config) = &self.damping_config {
             info.push_str(&format!(
                 "\nDamping Config:\n  Ground: {:.1}, Air: {:.1}",
@@ -104,5 +116,31 @@ impl PhysicsInfo {
         }
 
         info
+    }
+}
+
+pub fn visualize_ground_rays_system(
+    ray_query: Query<(&GroundRay, &GroundedState), With<Player>>,
+    debug_state: Res<super::super::components::DebugState>,
+    mut gizmos: Gizmos,
+) {
+    if !debug_state.enabled {
+        return;
+    }
+
+    for (ground_ray, grounded_state) in ray_query.iter() {
+        let ray_end = if let Some(hit_point) = ground_ray.hit_point {
+            hit_point
+        } else {
+            ground_ray.origin + ground_ray.direction * ground_ray.distance
+        };
+
+        let color = if grounded_state.is_grounded {
+            LinearRgba::GREEN
+        } else {
+            LinearRgba::RED
+        };
+
+        gizmos.line(ground_ray.origin, ray_end, color);
     }
 }

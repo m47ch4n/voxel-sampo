@@ -11,6 +11,7 @@ pub fn plugin(app: &mut App) {
                 toggle_debug_mode,
                 toggle_debug_visibility,
                 update_debug_text,
+                visualize_ground_rays_system,
             ),
         );
 }

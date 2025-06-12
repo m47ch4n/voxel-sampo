@@ -1,15 +1,29 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use super::components::{DynamicDamping, GroundDetection};
+use super::components::{DynamicDamping, GroundDetection, GroundRay};
 use crate::player::{GroundedState, Player};
 
 pub fn ground_detection_system(
-    mut query: Query<(&mut GroundedState, &Transform, &Velocity, &GroundDetection), With<Player>>,
+    mut query: Query<(Entity, &mut GroundedState, &Transform, &GroundDetection, &mut GroundRay), With<Player>>,
+    rapier_context: ReadRapierContext,
 ) {
-    for (mut grounded_state, transform, velocity, ground_detection) in query.iter_mut() {
-        grounded_state.is_grounded = velocity.linvel.y.abs() < ground_detection.velocity_threshold
-            && transform.translation.y <= ground_detection.height_threshold;
+    if let Ok(context) = rapier_context.single() {
+        for (entity, mut grounded_state, transform, ground_detection, mut ground_ray) in query.iter_mut() {
+            let ray_pos = transform.translation;
+            let ray_dir = Vec3::NEG_Y;
+            let max_toi = ground_detection.ray_distance;
+            let solid = true;
+            let filter = QueryFilter::default().exclude_collider(entity);
+
+            let hit_result = context.cast_ray(ray_pos, ray_dir, max_toi, solid, filter);
+            grounded_state.is_grounded = hit_result.is_some();
+
+            ground_ray.origin = ray_pos;
+            ground_ray.direction = ray_dir;
+            ground_ray.distance = max_toi;
+            ground_ray.hit_point = hit_result.map(|(_, toi)| ray_pos + ray_dir * toi);
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::physics::{DynamicDamping, GroundDetection};
+use crate::physics::{DynamicDamping, GroundDetection, GroundRay};
 use crate::player::{GroundedState, Player};
 
 #[derive(Bundle)]
@@ -9,6 +9,7 @@ pub struct PlayerBundle {
     pub player: Player,
     pub grounded_state: GroundedState,
     pub ground_detection: GroundDetection,
+    pub ground_ray: GroundRay,
     pub dynamic_damping: DynamicDamping,
     pub mesh: Mesh3d,
     pub material: MeshMaterial3d<StandardMaterial>,

@@ -8,3 +8,4 @@ pub mod world;
 
 pub use composer::*;
 pub use core::*;
+pub use physics::visualize_ground_rays_system;
