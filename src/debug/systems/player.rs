@@ -16,7 +16,7 @@ impl PlayerInfo {
     ) -> Self {
         if let Ok(player_transform) = player_query.single() {
             let position = player_transform.translation;
-            
+
             let (velocity, speed) = if let Ok(velocity) = rigidbody_query.single() {
                 let vel = velocity.linvel;
                 (Some(vel), Some(vel.length()))

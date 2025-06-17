@@ -7,9 +7,7 @@ pub struct GroundDetection {
 
 impl Default for GroundDetection {
     fn default() -> Self {
-        Self {
-            ray_distance: 0.6,
-        }
+        Self { ray_distance: 0.6 }
     }
 }
 

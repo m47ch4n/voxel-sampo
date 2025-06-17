@@ -3,7 +3,7 @@ use bevy_rapier3d::prelude::*;
 
 use super::bundles::PlayerBundle;
 use crate::config::Config;
-use crate::physics::{DynamicDamping, GroundDetection, GroundRay};
+use crate::physics::DynamicDamping;
 use crate::player::{GroundedState, Player};
 
 pub fn spawn_player(
@@ -15,11 +15,7 @@ pub fn spawn_player(
     let initial_player_pos = Vec3::new(0.0, 1.0, 0.0);
     commands.spawn(PlayerBundle {
         player: Player::new_with_config(&config.player),
-        grounded_state: GroundedState { is_grounded: false },
-        ground_detection: GroundDetection {
-            ray_distance: 0.6,
-        },
-        ground_ray: GroundRay::default(),
+        grounded_state: GroundedState::default(),
         dynamic_damping: DynamicDamping::default(),
         mesh: Mesh3d(meshes.add(Mesh::from(Cuboid::new(0.5, 0.5, 0.5)))),
         material: MeshMaterial3d(materials.add(StandardMaterial {

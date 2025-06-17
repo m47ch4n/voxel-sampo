@@ -1,5 +1,5 @@
-use crate::player::{GroundedState, Player};
 use crate::physics::{DynamicDamping, GroundDetection, GroundRay};
+use crate::player::{GroundedState, Player};
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 

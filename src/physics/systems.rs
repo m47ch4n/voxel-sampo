@@ -1,28 +1,56 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use super::components::{DynamicDamping, GroundDetection, GroundRay};
+use super::components::DynamicDamping;
 use crate::player::{GroundedState, Player};
 
+const GROUND_RAY_OFFSET_EPS: f32 = 2e-2;
+const GROUND_RAY_DISTANCE: f32 = 1e-1; // ε = 10cm
+
 pub fn ground_detection_system(
-    mut query: Query<(Entity, &mut GroundedState, &Transform, &GroundDetection, &mut GroundRay), With<Player>>,
+    mut query: Query<
+        (
+            Entity,
+            &mut GroundedState,
+            &Transform,
+            &Collider,
+        ),
+        With<Player>,
+    >,
     rapier_context: ReadRapierContext,
 ) {
     if let Ok(context) = rapier_context.single() {
-        for (entity, mut grounded_state, transform, ground_detection, mut ground_ray) in query.iter_mut() {
-            let ray_pos = transform.translation;
+        for (entity, mut grounded_state, transform, collider) in
+            query.iter_mut()
+        {
+            let bottom_y = if let Some(cuboid) = collider.as_cuboid() {
+                // bottom = center_y - half_extent_y
+                transform.translation.y - cuboid.half_extents().y
+            } else {
+                println!(
+                    "Warning: Non-cuboid collider detected, using center position as fallback"
+                );
+                transform.translation.y
+            };
+
+            // ray_start = bottom + ε to account for physics engine penetration
+            let ray_pos = Vec3::new(
+                transform.translation.x,
+                bottom_y + GROUND_RAY_OFFSET_EPS,
+                transform.translation.z,
+            );
             let ray_dir = Vec3::NEG_Y;
-            let max_toi = ground_detection.ray_distance;
+            let max_toi = GROUND_RAY_DISTANCE;
             let solid = true;
             let filter = QueryFilter::default().exclude_collider(entity);
 
             let hit_result = context.cast_ray(ray_pos, ray_dir, max_toi, solid, filter);
+            
             grounded_state.is_grounded = hit_result.is_some();
-
-            ground_ray.origin = ray_pos;
-            ground_ray.direction = ray_dir;
-            ground_ray.distance = max_toi;
-            ground_ray.hit_point = hit_result.map(|(_, toi)| ray_pos + ray_dir * toi);
+            grounded_state.ray_origin = ray_pos;
+            grounded_state.ray_direction = ray_dir;
+            grounded_state.ray_distance = max_toi;
+            grounded_state.hit_point = hit_result.map(|(_, toi)| ray_pos + ray_dir * toi);
         }
     }
 }

@@ -96,9 +96,7 @@ fn compose_debug_info(
 
 fn get_header_section() -> String {
     let mut header = String::new();
-    header.push_str(
-        "        _  _   __  _  _  ____  __      ____   __   _  _  ____   __        \n",
-    );
+    header.push_str("        _  _   __  _  _  ____  __      ____   __   _  _  ____   __        \n");
     header.push_str(
         "       / )( \\ /  \\( \\/ )(  __)(  )    / ___) / _\\ ( \\/ )(  _ \\ /  \\       \n",
     );
