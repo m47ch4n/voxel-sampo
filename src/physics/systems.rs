@@ -8,21 +8,11 @@ const GROUND_RAY_OFFSET_EPS: f32 = 2e-2;
 const GROUND_RAY_DISTANCE: f32 = 1e-1; // ε = 10cm
 
 pub fn ground_detection_system(
-    mut query: Query<
-        (
-            Entity,
-            &mut GroundedState,
-            &Transform,
-            &Collider,
-        ),
-        With<Player>,
-    >,
+    mut query: Query<(Entity, &mut GroundedState, &Transform, &Collider), With<Player>>,
     rapier_context: ReadRapierContext,
 ) {
     if let Ok(context) = rapier_context.single() {
-        for (entity, mut grounded_state, transform, collider) in
-            query.iter_mut()
-        {
+        for (entity, mut grounded_state, transform, collider) in query.iter_mut() {
             let bottom_y = if let Some(cuboid) = collider.as_cuboid() {
                 // bottom = center_y - half_extent_y
                 transform.translation.y - cuboid.half_extents().y
@@ -45,7 +35,7 @@ pub fn ground_detection_system(
             let filter = QueryFilter::default().exclude_collider(entity);
 
             let hit_result = context.cast_ray(ray_pos, ray_dir, max_toi, solid, filter);
-            
+
             grounded_state.is_grounded = hit_result.is_some();
             grounded_state.ray_origin = ray_pos;
             grounded_state.ray_direction = ray_dir;

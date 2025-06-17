@@ -4,10 +4,12 @@ use super::{
     world::WorldInfo,
 };
 use crate::camera::CameraAngle;
-use crate::physics::{DynamicDamping, GroundDetection, GroundRay};
+use crate::physics::DynamicDamping;
 use crate::player::{GroundedState, Player};
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
+
+// Type complexity warning suppressed for debug systems
 
 pub fn update_debug_text(
     debug_state: Res<DebugState>,
@@ -16,13 +18,11 @@ pub fn update_debug_text(
     physics_query: Query<
         (
             &GroundedState,
-            &GroundDetection,
             &DynamicDamping,
             &Damping,
             &GravityScale,
             &Friction,
             &Restitution,
-            &GroundRay,
         ),
         With<Player>,
     >,
@@ -56,13 +56,11 @@ fn compose_debug_info(
     physics_query: &Query<
         (
             &GroundedState,
-            &GroundDetection,
             &DynamicDamping,
             &Damping,
             &GravityScale,
             &Friction,
             &Restitution,
-            &GroundRay,
         ),
         With<Player>,
     >,
