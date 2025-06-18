@@ -10,22 +10,26 @@ pub struct Player {
 }
 
 #[derive(Component, Debug, Clone)]
+pub struct RayInfo {
+    pub origin: Vec3,
+    pub direction: Vec3,
+    pub distance: f32,
+    pub hit: Option<Vec3>,
+}
+
+#[derive(Component, Debug, Clone)]
 pub struct GroundedState {
     pub is_grounded: bool,
-    pub ray_origin: Vec3,
-    pub ray_direction: Vec3,
-    pub ray_distance: f32,
-    pub hit_point: Option<Vec3>,
+    pub rays: Vec<RayInfo>,
+    pub hit_count: usize,
 }
 
 impl Default for GroundedState {
     fn default() -> Self {
         Self {
             is_grounded: false,
-            ray_origin: Vec3::ZERO,
-            ray_direction: Vec3::NEG_Y,
-            ray_distance: 0.0,
-            hit_point: None,
+            rays: Vec::new(),
+            hit_count: 0,
         }
     }
 }

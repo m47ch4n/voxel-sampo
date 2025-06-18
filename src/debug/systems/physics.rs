@@ -72,8 +72,11 @@ impl PhysicsInfo {
 
         if let Some(grounded_state) = &self.grounded_state {
             info.push_str(&format!(
-                "\nGround Ray:\n  Origin: {:?}\n  Direction: {:?}\n  Distance: {:.2}\n  Hit Point: {:?}",
-                grounded_state.ray_origin, grounded_state.ray_direction, grounded_state.ray_distance, grounded_state.hit_point
+                "\nGround Rays (9-point grid):\n  Hits: {}/{}\n  Sample Ray Origin: {:?}\n  Sample Ray Direction: {:?}\n  Ray Distance: {:.2}",
+                grounded_state.hit_count, grounded_state.rays.len(),
+                grounded_state.rays.first().map(|r| r.origin).unwrap_or(Vec3::ZERO),
+                grounded_state.rays.first().map(|r| r.direction).unwrap_or(Vec3::NEG_Y),
+                grounded_state.rays.first().map(|r| r.distance).unwrap_or(0.0)
             ));
         }
 
@@ -117,18 +120,28 @@ pub fn visualize_ground_rays_system(
     }
 
     for grounded_state in ray_query.iter() {
-        let ray_end = if let Some(hit_point) = grounded_state.hit_point {
-            hit_point
-        } else {
-            grounded_state.ray_origin + grounded_state.ray_direction * grounded_state.ray_distance
-        };
+        for (i, ray_info) in grounded_state.rays.iter().enumerate() {
+            let ray_end = if let Some(hit_point) = ray_info.hit {
+                hit_point
+            } else {
+                ray_info.origin + ray_info.direction * ray_info.distance
+            };
 
-        let color = if grounded_state.is_grounded {
-            LinearRgba::GREEN
-        } else {
-            LinearRgba::RED
-        };
+            let color = if ray_info.hit.is_some() {
+                if i == 0 {
+                    LinearRgba::new(0.5, 1.0, 0.5, 1.0) // Center ray - brighter green
+                } else {
+                    LinearRgba::GREEN // Surrounding rays - regular green
+                }
+            } else {
+                if i == 0 {
+                    LinearRgba::new(1.0, 0.5, 0.5, 1.0) // Center ray - bright red
+                } else {
+                    LinearRgba::RED // Surrounding rays - regular red
+                }
+            };
 
-        gizmos.line(grounded_state.ray_origin, ray_end, color);
+            gizmos.line(ray_info.origin, ray_end, color);
+        }
     }
 }
